@@ -22,6 +22,8 @@ from eea.facetednavigation.widgets import ViewPageTemplateFile
 from eea.facetednavigation.widgets.widget import Widget as AbstractWidget
 from eea.facetednavigation.config import HAS_SOLR
 
+from plone.app.uuid.utils import uuidToURL
+
 EditSchema = Schema((
     StringField('index',
         schemata="default",
@@ -154,5 +156,10 @@ class AutocompleteSuggest(BrowserView):
         response = connection.doPost(
             connection.solrBase + '/suggest', request, connection.formheaders)
         root = etree.fromstring(response.read())
-        result = [item.text for item in root.xpath("//str[@name='Title']")]
+
+
+        result = [{'label': item.xpath(".//str[@name='Title']")[0].text,
+                   'value': uuidToURL(item.xpath(".//str[@name='UID']")[0].text)}
+                  for item in root.iter("doc")]
+        print result
         return json.dumps(result)

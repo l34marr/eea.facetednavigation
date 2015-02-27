@@ -172,9 +172,8 @@ Faceted.initializeAutocompleteWidget = function(evt){
         source: "autocomplete-suggest",
         minLength: 2,
         select: function (event, ui) {
-            log(ui.item ?
-              "Selected: " + ui.item.value + " aka " + ui.item.id :
-              "Nothing selected, input was " + this.value );
+            event.preventDefault();
+            window.location.href = ui.item.value;
         }
     });
   });

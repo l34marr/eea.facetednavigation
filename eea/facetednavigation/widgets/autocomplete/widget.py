@@ -2,16 +2,19 @@
 """
 import json
 import urllib
-from zope.component import queryUtility
+from zope.component import queryUtility, queryMultiAdapter
 
 from lxml import etree
 
+from Acquisition import aq_inner
 from Products.Archetypes.Field import BooleanField
 from Products.Archetypes.public import Schema
 from Products.Archetypes.public import SelectionWidget
 from Products.Archetypes.public import StringField
 from Products.Archetypes.public import StringWidget
 from Products.Archetypes.Widget import BooleanWidget
+from Products.CMFCore.utils import _getAuthenticatedUser
+from Products.CMFCore.utils import getToolByName
 from Products.Five import BrowserView
 
 from eea.facetednavigation import EEAMessageFactory as _
@@ -128,21 +131,28 @@ class AutocompleteSuggest(BrowserView):
     """
     def __call__(self):
         result = []
-        term = self.request.get('term')
-        if not HAS_SOLR or not term:
+        term = self.request.get('term', '')
+        if not HAS_SOLR or len(term)<3:
             return json.dumps(result)
 
         # we import c.solr here, because we checked, if it is available earlier
-        from collective.solr.interfaces import ISolrConnectionManager
-        manager = queryUtility(ISolrConnectionManager)
-        connection = manager.getConnection()
+        from collective.solr.interfaces import ISearch
+        from collective.solr.utils import prepareData
+        search = queryUtility(ISearch)
+        connection = search.getManager().getConnection()
         # XXX this should really go into c.solr
-        request = urllib.urlencode({'q': term}, doseq=True)
+        view = queryMultiAdapter((self.context, self.request),
+                                 name=u'faceted_query')
+        query = view.criteria()
+        catalog = getToolByName(aq_inner(self.context), 'portal_catalog')
+        user = _getAuthenticatedUser(self.context)
+        query['allowedRolesAndUsers'] = catalog._listAllowedRolesAndUsers(user)
+        prepareData(query)
+        params, query = search.buildQueryAndParameters(**query)
+        data = {'fq': ' '.join(query['fq']), 'q': term}
+        request = urllib.urlencode(data, doseq=True)
         response = connection.doPost(
             connection.solrBase + '/suggest', request, connection.formheaders)
         root = etree.fromstring(response.read())
-        suggestion = root.xpath("//arr[@name='suggestion']")
-        if len(suggestion):
-            result = [item.text for item in suggestion[0].findall('str')]
-
+        result = [item.text for item in root.xpath("//str[@name='Title']")]
         return json.dumps(result)

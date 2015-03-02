@@ -140,7 +140,7 @@ class AutocompleteSuggest(BrowserView):
         # we import c.solr here, because we checked, if it is available earlier
         from collective.solr.interfaces import ISearch
         from collective.solr.utils import prepareData
-        search = queryUtility(ISearch)
+        search = queryUtility(ISearch, context=self.context)
         connection = search.getManager().getConnection()
         # XXX this should really go into c.solr
         view = queryMultiAdapter((self.context, self.request),
@@ -161,5 +161,4 @@ class AutocompleteSuggest(BrowserView):
         result = [{'label': item.xpath(".//str[@name='Title']")[0].text,
                    'value': uuidToURL(item.xpath(".//str[@name='UID']")[0].text)}
                   for item in root.iter("doc")]
-        print result
         return json.dumps(result)

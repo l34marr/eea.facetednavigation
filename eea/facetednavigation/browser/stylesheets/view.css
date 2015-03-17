@@ -22,25 +22,25 @@
 
 #center-and-left-area {
   float: left;
-  margin-right: -25em;
+  margin-right: -17em;
   width: 100%;
 }
 
 #right-area {
   float: right;
-  width: 25em;
+  width: 17em;
   overflow: hidden;
 }
 
 #center-area {
   float: right;
-  margin-left: -25em;
+  margin-left: -17em;
   width: 100%;
 }
 
 #left-area {
   float: left;
-  width: 25em;
+  width: 17em;
   overflow: hidden;
 }
 
@@ -55,11 +55,11 @@
 }
 
 .right-area-js {
-  margin-right: 25em;
+  margin-right: 17em;
 }
 
 .left-area-js {
-  margin-left: 25em;
+  margin-left: 17em;
 }
 
 /* End Areas */

@@ -47,13 +47,15 @@
         option_id string:${wid}_option_${chbox_id};"
         tal:attributes="id option_id"
         >
-        <input type="checkbox" class="faceted-noborder" tal:attributes="
+        <input type="checkbox" class="faceted-noborder"
+          style="display: inline-block; vertical-align: top" tal:attributes="
           checked python:view.selected(term_id);
           name string:${wid};
           id chbox_id;
           title term_label;
           value term_id;" />
-        <label tal:attributes="for chbox_id; title term_label"
+        <label style="display: inline-block; width: 80%"
+          tal:attributes="for chbox_id; title term_label"
           tal:content="structure wbr_term_label">term label</label>
       </li>
     </tal:items>
